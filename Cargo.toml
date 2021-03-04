@@ -1,3 +1,6 @@
 [workspace]
-members=["main"]
+members=["main","jarvis","game"]
 resolver="2"
+[profile.release]
+# Tell `rustc` to optimize for small code size.
+opt-level = "s"

@@ -91,9 +91,10 @@ let resolution_map = new Map();
 resolution_map.set("x", SCREEN_X_SIZE);
 resolution_map.set("y", SCREEN_Y_SIZE);
 
-let game = rust.init_game(resolution_map);
-console.log(window);
-console.log("loaded game")
+//let game = rust.init_game(resolution_map);
+//console.log(window);
+//console.log("loaded game")
+let game = rust.start();
 function render() {
 
     let new_x_size = window.innerWidth;
@@ -128,7 +129,7 @@ function render() {
         event_state.set("position_y", last_y);
     }
 
-    game.render_frame(events);
+    game.run_frame(events);
     events = []
     requestAnimationFrame(render)
 }
