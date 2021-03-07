@@ -6,7 +6,8 @@ pub fn start() -> Game {
     console_log::init_with_level(LogLevel::Debug).expect("failed to init log");
     info!("hello world");
     let game = GameState::default();
-    let plugins: Vec<Box<dyn Plugin>> = vec![Box::new(game::Game {})];
+    let plugins: Vec<Box<dyn Plugin>> =
+        vec![Box::new(game::Game {}), Box::new(webgl::WebGL::new())];
     Game { game, plugins }
 }
 #[cfg(test)]
@@ -30,6 +31,7 @@ impl Game {
         }
     }
     pub fn run_frame(&mut self) {
+        info!("ran frame");
         for plug in self.plugins.iter_mut() {
             plug.on_frame(&mut self.game);
         }

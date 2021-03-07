@@ -129,7 +129,8 @@ function render() {
         event_state.set("position_y", last_y);
     }
 
-    game.run_frame(events);
+    game.run_frame();
+    //game.run_frame(events);
     events = []
     requestAnimationFrame(render)
 }

@@ -1,5 +1,5 @@
 [workspace]
-members=["main","jarvis","game"]
+members=["main","jarvis","game","webgl"]
 resolver="2"
 [profile.release]
 # Tell `rustc` to optimize for small code size.
