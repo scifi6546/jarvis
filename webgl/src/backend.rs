@@ -35,12 +35,11 @@ pub struct WebGlRenderTexture {
 pub struct WebFramebuffer {
     framebuffer: Option<WebGlFramebuffer>,
 }
-pub struct RenderingContext {
+pub struct Backend {
     context: WebGl2RenderingContext,
 }
-#[allow(dead_code)]
-impl RenderingContext {
-    pub fn new(_context: InitContext) -> Result<Self, ErrorType> {
+impl Backend {
+    pub fn new() -> Result<Self, ErrorType> {
         debug!("creating webgl2 instance");
         let window = web_sys::window().unwrap();
         let document = window.document().unwrap();
@@ -136,16 +135,7 @@ impl RenderingContext {
             WebGl2RenderingContext::ARRAY_BUFFER,
             (&position_buffer).as_ref(),
         );
-        let data_size = (3 + 2 + 3) * std::mem::size_of::<f32>() as i32 + {
-            {
-                let s: usize = mesh
-                    .description
-                    .iter()
-                    .map(|d| d.number_components * d.size_component)
-                    .sum();
-                s as i32
-            }
-        };
+        let data_size = mesh.get_vertex_size();
         //  Note that `Float32Array::view` is somewhat dangerous (hence the
         // `unsafe`!). This is creating a raw view into our module's
         // `WebAssembly.Memory` buffer, but if we allocate more pages for ourself
@@ -173,7 +163,7 @@ impl RenderingContext {
             3,
             WebGl2RenderingContext::FLOAT,
             false,
-            data_size,
+            data_size as i32,
             0.0,
         );
         self.context.vertex_attrib_pointer_with_i32(
@@ -181,7 +171,7 @@ impl RenderingContext {
             2,
             WebGl2RenderingContext::FLOAT,
             false,
-            data_size,
+            data_size as i32,
             3 * std::mem::size_of::<f32>() as i32,
         );
         self.context.vertex_attrib_pointer_with_i32(
@@ -189,31 +179,32 @@ impl RenderingContext {
             3,
             WebGl2RenderingContext::FLOAT,
             false,
-            data_size,
+            data_size as i32,
             5 * std::mem::size_of::<f32>() as i32,
         );
         let mut addn: usize = 0;
-        for desc in mesh.description.iter() {
-            self.context
-                .enable_vertex_attrib_array(shader.attributes[&desc.name].location.unwrap() as u32);
+        for desc in mesh.description().verticies.iter() {
+            self.context.enable_vertex_attrib_array(
+                shader.attributes[&desc.name()].location.unwrap() as u32,
+            );
             //info!("desc name: {}",desc.name);
             //info!("location: {}",shader.attributes[&desc.name].location.unwrap());
             self.context.vertex_attrib_pointer_with_i32(
-                shader.attributes[&desc.name].location.unwrap() as u32,
-                desc.number_components as i32,
+                shader.attributes[&desc.name()].location.unwrap() as u32,
+                desc.num_components() as i32,
                 WebGl2RenderingContext::FLOAT,
                 false,
-                data_size,
+                data_size as i32,
                 (3 + 2 + 3) * std::mem::size_of::<f32>() as i32 + addn as i32,
             );
-            addn += desc.number_components * desc.size_component;
+            addn += desc.size();
         }
         //custom verticies
 
         Ok(WebGlMesh {
             vertex_array_object: vao,
             position_buffer,
-            count: mesh.vertices.len() as i32,
+            count: mesh.num_verticies() as i32,
         })
     }
     pub fn delete_mesh(&mut self, mesh: &mut WebGlMesh) -> Result<(), ErrorType> {
@@ -547,4 +538,4 @@ impl RenderingContext {
 }
 
 /// Send can be implemented because threads do not exist in wasm
-unsafe impl Send for RenderingContext {}
+unsafe impl Send for Backend {}

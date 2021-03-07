@@ -1,24 +1,39 @@
 use nalgebra::{Vector2, Vector3};
 #[derive(Debug, PartialEq)]
-enum VertexType {
+pub enum VertexType {
     Position,
     Normal,
     UV,
 }
 impl VertexType {
-    fn size(&self) -> usize {
+    pub fn size(&self) -> usize {
         match self {
             Self::Position => 3 * std::mem::size_of::<f32>(),
             Self::Normal => 3 * std::mem::size_of::<f32>(),
             Self::UV => 2 * std::mem::size_of::<f32>(),
         }
     }
+    pub fn num_components(&self) -> usize {
+        match self {
+            Self::Position => 3,
+            Self::Normal => 3,
+            Self::UV => 2,
+        }
+    }
+    pub fn name(&self) -> String {
+        match self {
+            Self::Position => "position".to_string(),
+            Self::Normal => "normal".to_string(),
+            Self::UV => "uv".to_string(),
+        }
+    }
 }
 #[derive(Debug, PartialEq)]
-struct VertexDesc {
-    verticies: Vec<VertexType>,
+pub struct VertexDesc {
+    pub verticies: Vec<VertexType>,
 }
 impl VertexDesc {
+    //gets size used by vertex in bytes
     fn get_size(&self) -> usize {
         self.verticies.iter().map(|v| v.size()).sum()
     }
@@ -73,8 +88,14 @@ impl Mesh {
     pub fn get_data(&self) -> &Vec<f32> {
         &self.data
     }
+    pub fn description(&self) -> &VertexDesc {
+        &self.vertex_description
+    }
     pub fn get_vertex_size(&self) -> usize {
         self.vertex_description.get_size()
+    }
+    pub fn num_verticies(&self) -> usize {
+        self.data.len() / (self.vertex_description.get_size() / std::mem::size_of::<f32>())
     }
 }
 #[cfg(test)]
@@ -97,5 +118,6 @@ mod tests {
             vertex_mesh.get_data(),
             &vec![0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         );
+        assert_eq!(vertex_mesh.num_verticies(), 1);
     }
 }
