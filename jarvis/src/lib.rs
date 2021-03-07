@@ -1,5 +1,6 @@
 use legion::*;
 use nalgebra::Vector2;
+mod mesh;
 pub trait Plugin {
     /// Makes sure the game is ready for use
     fn setup(&mut self, game: &mut GameState);
@@ -67,12 +68,13 @@ impl<T> Grid<T> {
 pub struct Texture {}
 pub struct Model {}
 pub mod prelude {
+    pub use super::mesh::Mesh;
     pub use super::AssetManager;
     pub use super::GameState;
     pub use super::Grid;
     pub use super::Plugin;
-    pub use log::{info, Level as LogLevel};
-    pub use nalgebra::Vector2;
+    pub use log::{debug, error, info, Level as LogLevel};
+    pub use nalgebra::{Matrix4, Vector2, Vector3, Vector4};
 }
 #[cfg(test)]
 mod tests {
